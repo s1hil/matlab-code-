@@ -1,5 +1,4 @@
-
-	clc;
+           clc;
 	clear;
 	close;
 	t=0:0.1:2 %pi;
@@ -18,5 +17,4 @@ y2=2*sin(t);
 subplot(2,2,3);
 plot(t,y2)
 y3=2*sin(5*t);
-	subplot(2,2,4);
-	plot(t,y3)
+subplot(2,2,4);plot(t,y3)
