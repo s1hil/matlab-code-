@@ -1,4 +1,3 @@
-
 clc;
 clear;
 close all;
@@ -115,5 +114,4 @@ figure(7);
 plot(t6,x8,'r','LineWidth',1.5);
 xlabel('Time');
 ylabel('Amplitude');
-title('Increasing Exponential Signal');
-grid on;
+title('Increasing Exponential Signal');grid on; 
