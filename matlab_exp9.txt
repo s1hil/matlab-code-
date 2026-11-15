@@ -1,0 +1,108 @@
+
+clc;
+clear;
+close all;
+
+Fs = 1000;
+
+t = 0:1/Fs:0.5-1/Fs;
+
+x = sin(2*pi*10*t);
+
+y = sin(2*pi*10*(t-0.02));
+
+rng(1);
+
+w = randn(size(t));
+
+xn = x + 0.8*w;
+
+[rxx,lag] = xcorr(x);
+
+[rww,lagw] = xcorr(w);
+
+[rnn,lagn] = xcorr(xn);
+
+[rxy,lagxy] = xcorr(y,x);
+
+[~,idx] = max(rxy);
+
+delay_samples = lagxy(idx);
+
+fprintf('Estimated delay = %d samples = %.1f ms\n', ...
+    delay_samples,1000*delay_samples/Fs);
+
+r_conv = conv(x,fliplr(x));
+
+fprintf('Max difference xcorr vs conv = %e\n', ...
+    max(abs(rxx-r_conv)));
+
+fprintf('r_xx(0) = %.4f, Energy = %.4f\n', ...
+    rxx(lag==0),sum(x.^2));
+
+N = length(rxx);
+
+PSD1 = abs(fft(rxx));
+
+PSD2 = abs(fft(x,N)).^2;
+
+fprintf('Max difference (W-K theorem) = %e\n', ...
+    max(abs(PSD1-PSD2)));
+
+figure;
+
+subplot(4,2,1);
+plot(t,x);
+grid on;
+title('Signal x(t)');
+xlabel('Time (s)');
+ylabel('Amplitude');
+
+subplot(4,2,2);
+plot(t,y,'r');
+grid on;
+title('Delayed signal y(t)');
+xlabel('Time (s)');
+ylabel('Amplitude');
+
+subplot(4,2,3);
+plot(lag,rxx);
+grid on;
+title('Autocorrelation of sine');
+xlabel('Lag (samples)');
+ylabel('r_{xx}');
+
+subplot(4,2,4);
+plot(lagw,rww);
+grid on;
+title('Autocorrelation of white noise');
+xlabel('Lag (samples)');
+ylabel('r_{ww}');
+
+subplot(4,2,5);
+plot(t,xn);
+grid on;
+title('Noisy sine x(t)+noise');
+xlabel('Time (s)');
+ylabel('Amplitude');
+
+subplot(4,2,6);
+plot(lagn,rnn);
+grid on;
+title('Autocorrelation of noisy sine');
+xlabel('Lag (samples)');
+ylabel('r_{nn}');
+
+subplot(4,2,7);
+plot(lagxy,rxy);
+grid on;
+title('Cross-correlation r_{xy}');
+xlabel('Lag (samples)');
+ylabel('r_{xy}');
+
+subplot(4,2,8);
+plot(fftshift(PSD1));
+grid on;
+title('FFT of autocorrelation (power spectrum)');
+xlabel('Frequency bin');
+ylabel('|X|^2');

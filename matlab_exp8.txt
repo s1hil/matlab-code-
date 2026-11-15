@@ -1,0 +1,183 @@
+
+clc;
+clear;
+close all;
+
+%% Define Input Signals
+
+n = 0:19;
+
+x = 0.8.^n;
+
+h = ones(1,10)/10;
+
+
+%% Calculate Signal Lengths
+
+Lx = length(x);
+
+Lh = length(h);
+
+L = Lx + Lh - 1;
+
+
+%% Time-Domain Convolution
+
+y_time = conv(x,h);
+
+
+%% Frequency-Domain Convolution Using FFT
+
+N = 2^nextpow2(L);
+
+X = fft(x,N);
+
+H = fft(h,N);
+
+Y = X.*H;
+
+y_freq = real(ifft(Y));
+
+y_freq = y_freq(1:L);
+
+
+%% Calculate Error
+
+err = max(abs(y_time-y_freq));
+
+fprintf('Max difference between conv() and IFFT(X.*H) = %e\n',err);
+
+
+%% Frequency Vector
+
+w = (0:N-1)*(2*pi/N);
+
+Y_conv = fft(y_time,N);
+
+
+%% Plot All Results
+
+figure;
+
+
+% 1. Input Signal x[n]
+
+subplot(4,2,1);
+
+stem(n,x,'filled');
+
+grid on;
+
+title('Signal x[n]');
+
+xlabel('n');
+
+ylabel('Amplitude');
+
+
+% 2. Input Signal h[n]
+
+subplot(4,2,2);
+
+stem(0:Lh-1,h,'filled');
+
+grid on;
+
+title('Signal h[n]');
+
+xlabel('n');
+
+ylabel('Amplitude');
+
+
+% 3. Time-Domain Convolution
+
+subplot(4,2,3);
+
+stem(0:L-1,y_time,'filled');
+
+grid on;
+
+title('Time-domain convolution: conv(x,h)');
+
+xlabel('n');
+
+ylabel('Amplitude');
+
+
+% 4. Frequency-Domain Convolution
+
+subplot(4,2,4);
+
+stem(0:L-1,y_freq,'filled','r');
+
+grid on;
+
+title('Frequency-domain method: IFFT(X.H)');
+
+xlabel('n');
+
+ylabel('Amplitude');
+
+
+% 5. Magnitude Spectrum of X
+
+subplot(4,2,5);
+
+plot(w(1:N/2),abs(X(1:N/2)),'b');
+
+grid on;
+
+title('|X(\omega)|');
+
+xlabel('\omega (rad)');
+
+ylabel('Magnitude');
+
+
+% 6. Magnitude Spectrum of H
+
+subplot(4,2,6);
+
+plot(w(1:N/2),abs(H(1:N/2)),'m');
+
+grid on;
+
+title('|H(\omega)|');
+
+xlabel('\omega (rad)');
+
+ylabel('Magnitude');
+
+
+% 7. Comparison of Frequency-Domain Results
+
+subplot(4,2,7);
+
+plot(w(1:N/2),abs(Y(1:N/2)),'k', ...
+     w(1:N/2),abs(Y_conv(1:N/2)),'r--');
+
+grid on;
+
+title('|X.H| vs |FFT of conv|');
+
+xlabel('\omega (rad)');
+
+ylabel('Magnitude');
+
+legend('X \cdot H','FFT\{x*h\}');
+
+
+% 8. Difference / Error
+
+subplot(4,2,8);
+
+plot(0:L-1,y_time-y_freq);
+
+grid on;
+
+title('Difference (error)');
+
+xlabel('n');
+
+ylabel('Error');

@@ -1,0 +1,154 @@
+
+clc;
+clear;
+close all;
+
+%% Basic Parameters
+
+Fs = 1000;              % Sampling frequency
+L = 1000;               % Number of samples
+
+t = (0:L-1)/Fs;          % Time vector
+
+%% Generate Original Signal
+
+x = 0.7*sin(2*pi*50*t) + sin(2*pi*120*t + pi/4);
+
+N = L;
+
+%% FFT Calculation
+
+X = fftshift(fft(x,N));
+
+f = (-N/2:N/2-1)*(Fs/N);
+
+%% Magnitude and Phase Spectrum
+
+mag = abs(X)/N;
+
+phase = angle(X);
+
+phase(mag < 1e-3) = 0;
+
+%% Signal Reconstruction Using IFFT
+
+x_rec = real(ifft(ifftshift(X)));
+
+%% Calculate Reconstruction Error
+
+err = max(abs(x-x_rec));
+
+fprintf('Maximum reconstruction error = %e\n',err);
+
+%% Plot All Results
+
+figure(1);
+
+% 1. Original Signal
+
+subplot(3,2,1);
+
+plot(t,x,'b','LineWidth',1.2);
+
+grid on;
+
+title('Original Signal x(t)');
+
+xlabel('Time (s)');
+
+ylabel('Amplitude');
+
+xlim([0 0.1]);
+
+
+% 2. Reconstructed Signal
+
+subplot(3,2,2);
+
+plot(t,x_rec,'r','LineWidth',1.2);
+
+grid on;
+
+title('Reconstructed Signal (IFFT)');
+
+xlabel('Time (s)');
+
+ylabel('Amplitude');
+
+xlim([0 0.1]);
+
+
+% 3. Magnitude Spectrum
+
+subplot(3,2,3);
+
+stem(f,mag,'filled','MarkerSize',3);
+
+grid on;
+
+title('Magnitude Spectrum |X(f)|');
+
+xlabel('Frequency (Hz)');
+
+ylabel('Magnitude');
+
+xlim([-200 200]);
+
+
+% 4. Phase Spectrum
+
+subplot(3,2,4);
+
+stem(f,phase,'filled','MarkerSize',3);
+
+grid on;
+
+title('Phase Spectrum angle X(f)');
+
+xlabel('Frequency (Hz)');
+
+ylabel('Phase (rad)');
+
+xlim([-200 200]);
+
+
+% 5. Single-Sided Magnitude Spectrum
+
+subplot(3,2,5);
+
+P1 = mag(1:N/2+1);
+
+P1(2:end-1) = 2*P1(2:end-1);
+
+f1 = Fs*(0:N/2)/N;
+
+plot(f1,P1,'LineWidth',1.2);
+
+grid on;
+
+title('Single-Sided Magnitude Spectrum');
+
+xlabel('Frequency (Hz)');
+
+ylabel('Amplitude');
+
+xlim([0 200]);
+
+
+% 6. Reconstruction Error
+
+subplot(3,2,6);
+
+plot(t,x-x_rec,'k');
+
+grid on;
+
+title('Reconstruction Error');
+
+xlabel('Time (s)');
+
+ylabel('Error');
+
+xlim([0 0.1]);
+
+sgtitle('FFT Analysis and Signal Reconstruction');
